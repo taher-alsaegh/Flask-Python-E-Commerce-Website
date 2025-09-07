@@ -1,0 +1,4 @@
+i# Virtual environments
+.venv/
+venv/
+ENV/
