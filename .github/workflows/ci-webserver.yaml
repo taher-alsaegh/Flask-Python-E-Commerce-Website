@@ -25,11 +25,11 @@ jobs:
             requirements.txt
             requirements-dev.txt
 
-      #- name: Install dependencies
-      #  run: |
-      #    python -m pip install --upgrade pip
-      #    pip install -r requirements.txt
-      #    pip install pytest flake8 black isort mypy bandit
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest flake8 black isort mypy bandit
 
       # --- Code Style ---
       - name: Lint with flake8
