@@ -1,6 +1,6 @@
 import pytest
 
-from application import app
+from  /opt/Flask-Python-E-Commerce-Website/application import app
 
 
 @pytest.fixture
