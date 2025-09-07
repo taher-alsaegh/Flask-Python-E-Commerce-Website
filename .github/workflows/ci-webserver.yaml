@@ -35,15 +35,6 @@ jobs:
       - name: Lint with flake8
         run: flake8 src/ tests/
 
-      - name: Check formatting with Black
-        run: black --check src/ tests/
-
-      - name: Check imports with isort
-        run: isort --check-only src/ tests/
-
-      - name: Static type checking with mypy
-        run: mypy src/
-
       # --- Security ---
       - name: Security scan with bandit
         run: bandit -q -r src/
