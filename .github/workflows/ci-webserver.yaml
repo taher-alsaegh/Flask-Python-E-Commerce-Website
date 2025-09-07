@@ -31,14 +31,10 @@ jobs:
           pip install -r requirements.txt
           pip install pytest flake8 black isort mypy bandit
 
-      # --- Code Style ---
       - name: Lint with flake8
         run: flake8 .
 
-      # --- Security ---
-      #- name: Security scan with bandit
-      #  run: bandit -q -r src/
-
-      # --- Tests ---
       - name: Run Unit Tests
-        run: pytest -q
+        run: |
+          pytest tests/ -v --tb=short
+
