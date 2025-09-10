@@ -1,7 +1,6 @@
 import pytest
 
-from  /opt/Flask-Python-E-Commerce-Website/application import app
-
+from app import app
 
 @pytest.fixture
 def client():
