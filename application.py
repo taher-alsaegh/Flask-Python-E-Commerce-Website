@@ -12,11 +12,23 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Creates a connection to the database
-db = SQL ( "mysql://shopuser:password@10.11.5.5:3306/ecommerce" )
+def get_db():
+    if not hasattr(get_db, 'db'):
+        get_db.db = SQL("mysql://shopuser:password@10.11.5.5:3306/ecommerce")
+    return get_db.db
+
+def init_db():
+    global db
+    db = get_db()
+
+# Initialize db when running the app
+if __name__ == '__main__':
+    init_db()
 
 
 @app.route("/")
 def index():
+    db = get_db()
     shirts = db.execute("SELECT * FROM shirts ORDER BY onSalePrice")
     shirtsLen = len(shirts)
     # Initialize variables
@@ -236,6 +248,7 @@ def logout():
 
 @app.route("/register/", methods=["POST"] )
 def registration():
+    db = get_db()
     # Get info from form
     username = request.form["username"]
     password = request.form["password"]
