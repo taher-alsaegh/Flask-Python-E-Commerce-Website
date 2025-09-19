@@ -85,7 +85,7 @@ jobs:
   publish:
     name: Build & Publish Python Package to Azure DevOps Feed
     runs-on: ubuntu-latest
-    needs: [tests]    # Nur veröffentlichen, wenn Tests grün
+    needs: [tests] 
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
