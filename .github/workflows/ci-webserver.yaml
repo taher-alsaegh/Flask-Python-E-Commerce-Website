@@ -123,12 +123,22 @@ jobs:
       - name: Publish to Azure DevOps Feed
         run: twine upload --repository azure dist/*
 
-      - name: (Optional) Test install from feed
+      # - name: (Optional) Test install from feed
+      #   run: |
+      #     python -m venv venv
+      #     source venv/bin/activate
+      #     pip install --upgrade pip
+      #     pip install --index-url https://pkgs.dev.azure.com/${{ secrets.AZDO_ORG }}/${{ secrets.AZDO_PROJECT }}/_packaging/${{ secrets.AZDO_FEED }}/pypi/simple/ my-python-package==0.1.0
+
+      - name: Verify install (no upstream caching)
+        env:
+          FEED: https://azdo:${{ secrets.AZDO_PAT }}@pkgs.dev.azure.com/${{ secrets.AZDO_ORG }}/${{ secrets.AZDO_PROJECT }}/_packaging/${{ secrets.AZDO_FEED }}/pypi/simple/
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
-          pip install --index-url https://pkgs.dev.azure.com/${{ secrets.AZDO_ORG }}/${{ secrets.AZDO_PROJECT }}/_packaging/${{ secrets.AZDO_FEED }}/pypi/simple/ my-python-package==0.1.0
+          # Feed nur wenn nötig; Dependencies kommen von PyPI
+          pip install --index-url https://pypi.org/simple --extra-index-url "$FEED" "${{ steps.bump.outputs.name }}==${{ steps.bump.outputs.version }}"
 
       - name: Upload built artifacts (optional)
         uses: actions/upload-artifact@v4
