@@ -3,13 +3,16 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "my-python-package"
+name = "e-commerce"
 version = "0.1.0"
-description = "Beispielpaket für Azure DevOps Feed"
-authors = [ { name = "Dein Name", email = "dein.name@example.com" } ]
+description = "Ecommerce Feed"
+authors = [ { name = "Taher Al Saegh", email = "taher.alsaegh@edu.tbz.ch } ]
 dependencies = [ "requests>=2.25.0" ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.urls]
-Homepage = "https://dev.azure.com/<ORG>/<PROJECT>"
-Repository = "https://dev.azure.com/<ORG>/<PROJECT>/_git/my-python-package"
+Homepage = "https://dev.azure.com/taheralsaegh/DevOps-HF"
+Repository = "https://dev.azure.com/taheralsaegh/DevOps-HF/_git/my-python-package"
+
+[tool.setuptools]
+py-modules = ["application", "wsgi"]
