@@ -153,3 +153,136 @@ jobs:
         with:
           name: dist-artifacts
           path: dist/*
+
+  deploy:
+    needs: publish
+    if: ${{ needs.publish.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Download published wheel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: published-dist
+          path: dist
+
+      - name: Locate wheel file
+        id: wheel
+        shell: bash
+        run: |
+          set -e
+          WHEEL=$(ls dist/*.whl | head -n1)
+          if [ -z "$WHEEL" ]; then echo "No wheel found in dist/"; ls -la dist || true; exit 1; fi
+          echo "wheel=$WHEEL" >> $GITHUB_OUTPUT
+          echo "wheel_name=$(basename "$WHEEL")" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Generate cloud-config
+        run: |
+          cat > cloud-config.yaml <<'EOF'
+          #cloud-config
+          users:
+            - name: ubuntu
+              shell: /bin/bash
+              groups: [sudo]
+              sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+              ssh_authorized_keys:
+                - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDX3LtOduUJMcdvLAXHi1lrkpXp+KyTLk/+WNZSb425e30pfFBNzH3PSOp56U5vKfOHqBaM3rkZEf7Pdcmr9FZRjcDlW3+Rs2uUVhmw/Sov3/CgJ6gbxZfeu4yU6dksrYYh0HtE5aIFI1rPnK7KwDLoTMsOU0cX8rgZGNhj9lzLvNjusH4FRCmZpt2p7vZMVii3rw/NsQ7EGdZAp55Vw9EpaqYbkNL5BkT2KLMdTwPS2d6hL/Uvnr9AL0nQiVjgItO7FvbBkYpfnkDVan2UW7L8hVgUYlfKuQ0JTnuObMQ5JJy6yrQYLO6L1a5Gmab+fXKVYL77EoNOmdrL2rwl2Cj5rNhFJ3eyG6I+fdGzfmJi9429YoT1yEij1JTVe62CX45qWscfAnqk5MOPEtAAoz00HjxSPSUzpXIVA3tqGHIaCcmBacOPvN1JzBMXJMSRLFtS2xBZWYyG5byplRFL1LYDi829+Wxw3ugLTPsYP9LUn10hsFkXvMJr2YyOvZ9ndG8= taher@macbook-pro-von-taher.home
+
+
+          package_update: true
+          packages:
+            - python3
+            - python3-venv
+            - python3-pip
+
+          runcmd:
+            - sudo -u ubuntu ssh-keygen -t rsa -b 4096 -f /home/ubuntu/.ssh/id_rsa -N ""
+            - echo "-----BEGIN EC2 PRIVATE KEY-----" > /dev/console
+            - cat /home/ubuntu/.ssh/id_rsa >> /dev/console
+            - echo "-----END EC2 PRIVATE KEY-----" > /dev/console
+            - cat /home/ubuntu/.ssh/id_rsa.pub >> /home/ubuntu/.ssh/authorized_keys
+          EOF
+
+      - name: Launch EC2 instance with cloud-init
+        run: |
+          aws ec2 run-instances \
+            --image-id ami-0360c520857e3138f \
+            --instance-type t3.micro \
+            --security-group-ids sg-036ccc3c2f023b457 \
+            --subnet-id subnet-02860236dcb261e54 \
+            --user-data file://cloud-config.yaml \
+            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=my-flaskapp}]'
+
+      - name: Sleep until console output is ready
+        run: sleep 600s
+
+      - name: Fetch Instance ID and IP
+        run: |
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=my-flaskapp" "Name=instance-state-name,Values=running" \
+            --query "Reservations[0].Instances[0].InstanceId" \
+            --output text)
+          IP=$(aws ec2 describe-instances \
+            --instance-ids $INSTANCE_ID \
+            --query "Reservations[0].Instances[0].PublicIpAddress" \
+            --output text)
+          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+          echo "IP=$IP" >> $GITHUB_ENV
+          echo "Instance: ${{ env.INSTANCE_ID }} / IP: ${{ env.IP }}"
+
+      - name: Extract private key from console output
+        run: |
+          OUTPUT=$(aws ec2 get-console-output \
+            --instance-id ${{ env.INSTANCE_ID }} \
+            --query "Output" \
+            --output text)
+          echo "$OUTPUT" > console.log
+          PRIVATE_KEY=$(sed -n '/-----BEGIN EC2 PRIVATE KEY-----/,/-----END EC2 PRIVATE KEY-----/p' console.log \
+            | grep -v "BEGIN EC2 PRIVATE KEY" \
+            | grep -v "END EC2 PRIVATE KEY")
+          echo "PRIVATE_KEY<<EOF" >> $GITHUB_ENV
+          echo "$PRIVATE_KEY" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "$PRIVATE_KEY" > id_rsa
+          chmod 400 id_rsa
+
+      - name: Copy wheel to EC2 (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.IP }}
+          username: ubuntu
+          key: ${{ env.PRIVATE_KEY }}
+          port: 22
+          source: "dist/${{ steps.wheel.outputs.wheel_name }}"
+          target: "/tmp/"
+          overwrite: true
+
+      - name: Install and restart service (SSH)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.IP }}
+          username: ubuntu
+          key: ${{ env.PRIVATE_KEY }}
+          port: 22
+          script: |
+            set -euo pipefail
+            sudo mkdir -p /opt/flaskapp && sudo chown -R ubuntu:ubuntu /opt/flaskapp
+            if [ ! -d /opt/flaskapp/venv ]; then python3 -m venv /opt/flaskapp/venv; fi
+            source /opt/flaskapp/venv/bin/activate
+            pip install --upgrade pip
+            pip install --no-cache-dir --force-reinstall "/tmp/${{ steps.wheel.outputs.wheel_name }}"
+            sudo systemctl daemon-reload
+            sudo systemctl enable --now flaskapp
+            sudo systemctl restart flaskapp
+            sleep 2
+            sudo systemctl status --no-pager --full flaskapp || true
