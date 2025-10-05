@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Deploying after publish"
+
+      - name: Checkout
+        uses: actions/checkout@v4
       
       - name: Download published wheel artifact
         uses: actions/download-artifact@v4
