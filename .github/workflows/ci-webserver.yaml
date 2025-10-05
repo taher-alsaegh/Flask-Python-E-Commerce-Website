@@ -218,8 +218,8 @@ jobs:
           aws ec2 run-instances \
             --image-id ami-0360c520857e3138f \
             --instance-type t3.micro \
-            --security-group-ids sg-036ccc3c2f023b457 \
-            --subnet-id subnet-02860236dcb261e54 \
+            --security-group-ids sg-0bb418deecfe5ba5f \
+            --subnet-id subnet-036e3bffe11c6d11c \
             --user-data file://cloud-config.yaml \
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=my-flaskapp}]'
 
