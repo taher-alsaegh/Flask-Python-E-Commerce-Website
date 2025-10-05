@@ -140,7 +140,7 @@ jobs:
 
       - name: Verify install (no upstream caching)
         env:
-          FEED: https://azdo:${{ secrets.AZDO_PAT }}@pkgs.dev.azure.com/${{ secrets.AZDO_ORG }}/${{ secrets.AZDO_PROJECT }}/_packaging/${{ secrets.AZDO_FEED }}/pypi/simple/
+          FEED: https://azdo:${{ secrets.AZDO_PAT }}@pkgs.dev.azure.com/${{ secrets.AZDO_ORG }}/${{ secrets.AZDO_PROJECT }}/_packaging/${{ secrets.AZDO_FEED }}/pypi/simple
         run: |
           python -m venv venv
           source venv/bin/activate
