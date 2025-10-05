@@ -122,32 +122,21 @@ jobs:
 
       - name: Publish to Azure DevOps Feed
         run: twine upload --repository azure dist/*
-
-      # - name: (Optional) Test install from feed
-      #   run: |
-      #     python -m venv venv
-      #     source venv/bin/activate
-      #     pip install --upgrade pip
-      #     pip install --index-url https://pkgs.dev.azure.com/${{ secrets.AZDO_ORG }}/${{ secrets.AZDO_PROJECT }}/_packaging/${{ secrets.AZDO_FEED }}/pypi/simple/ my-python-package==0.1.0
-
-      # - name: Verify install (no upstream caching)
-      #   env:
-      #     FEED: https://azdo:${{ secrets.AZDO_PAT }}@pkgs.dev.azure.com/${{ secrets.AZDO_ORG }}/${{ secrets.AZDO_PROJECT }}/_packaging/${{ secrets.AZDO_FEED }}/pypi/simple/
-      #   run: |
-      #     python -m venv venv
-      #     source venv/bin/activate
-      #     pip install --upgrade pip
-      #     # Feed nur wenn nötig; Dependencies kommen von PyPI
-      #     pip install --index-url https://pypi.org/simple --extra-index-url "$FEED" "${{ steps.bump.outputs.name }}==${{ steps.bump.outputs.version }}"
-
-
-      - name: Get package name and version
+  
+      - name: Get package name and version #It will collect the version number from toml file and will use it further for the no upstream caching
         id: pkginfo
         run: |
           NAME=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['name'])")
           VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
           echo "name=$NAME" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT 
+      
+    ## - name: (Optional) Test install from feed (VARIANTE OHNE AUTO VERSIONING) unterhalb ist die mit auto versioning --> see my-python-package==0.1.0
+          #   run: |
+          #     python -m venv venv
+          #     source venv/bin/activate
+          #     pip install --upgrade pip
+          #     pip install --index-url https://pkgs.dev.azure.com/${{ secrets.AZDO_ORG }}/${{ secrets.AZDO_PROJECT }}/_packaging/${{ secrets.AZDO_FEED }}/pypi/simple/ my-python-package==0.1.0
 
       - name: Verify install (no upstream caching)
         env:
