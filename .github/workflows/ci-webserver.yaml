@@ -131,7 +131,7 @@ jobs:
           echo "name=$NAME" >> $GITHUB_OUTPUT
           echo "version=$VERSION" >> $GITHUB_OUTPUT 
       
-    ## - name: (Optional) Test install from feed (VARIANTE OHNE AUTO VERSIONING) unterhalb ist die mit auto versioning --> see my-python-package==0.1.0
+     # - name: (Optional) Test install from feed (VARIANTE OHNE AUTO VERSIONING) unterhalb ist die mit auto versioning --> see my-python-package==0.1.0
           #   run: |
           #     python -m venv venv
           #     source venv/bin/activate
