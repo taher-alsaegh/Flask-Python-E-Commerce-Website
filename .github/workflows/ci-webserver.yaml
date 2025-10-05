@@ -225,7 +225,7 @@ jobs:
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=my-flaskapp}]'
 
       - name: Sleep until console output is ready
-        run: sleep 600s
+        run: sleep 180s
 
       - name: Fetch Instance ID and IP
         run: |
@@ -273,7 +273,7 @@ jobs:
         with:
           host: ${{ env.IP }}
           username: ubuntu
-          key: ${{ env.PRIVATE_KEY }}
+          key: ${{ secrets.PRV_KEY }}
           port: 22
           script: |
             set -euo pipefail
