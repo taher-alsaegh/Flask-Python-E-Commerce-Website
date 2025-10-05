@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "e-commerce"
-version = "0.1.2"
+version = "0.2.0"
 description = "Ecommerce Feed"
 authors = [ { name = "Taher Al Saegh", email = "taher.alsaegh@edu.tbz.ch" } ]
 dependencies = [ "requests>=2.25.0" ]
