@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "e-commerce"
-version = "0.2.99"
+version = "0.3.0"
 description = "Ecommerce Flask Web Application"
 authors = [{ name = "Taher Al Saegh", email = "taher.alsaegh@edu.tbz.ch" }]
 requires-python = ">=3.9"
@@ -29,3 +29,4 @@ Repository = "https://dev.azure.com/taheralsaegh/DevOps-HF/_git/my-python-packag
 # Alle Python-Module oder Packages, die im Wheel landen sollen:
 py-modules = ["application", "wsgi"]
 include-package-data = true
+packages = ["e_commerce"]
