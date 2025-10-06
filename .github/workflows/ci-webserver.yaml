@@ -306,6 +306,6 @@ jobs:
           script: |
             set -euo pipefail
             source /opt/flaskapp/venv/bin/activate
-            pip install --no-cache-dir --force-reinstall "/tmp/${{ steps.wheel.outputs.wheel_name }}"
+            pip install --no-cache-dir --force-reinstall "/tmp/dist/${{ steps.wheel.outputs.wheel_name }}"
             sudo systemctl restart ecommerce.service
             sudo systemctl status --no-pager --full ecommerce.service || true

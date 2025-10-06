@@ -4,15 +4,28 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "e-commerce"
-version = "0.2.95"
-description = "Ecommerce Feed"
-authors = [ { name = "Taher Al Saegh", email = "taher.alsaegh@edu.tbz.ch" } ]
-dependencies = [ "requests>=2.25.0" ]
+version = "0.2.97"
+description = "Ecommerce Flask Web Application"
+authors = [{ name = "Taher Al Saegh", email = "taher.alsaegh@edu.tbz.ch" }]
 requires-python = ">=3.9"
+
+# Hier alle Dependencies, die Flask und dein Projekt benötigen:
+dependencies = [
+    "Flask>=3.0.0",
+    "gunicorn>=21.0.0",
+    "requests>=2.25.0",
+    "sqlalchemy>=2.0.0",
+    "cs50>=9.2.0",
+    "itsdangerous>=2.1.0",
+    "Jinja2>=3.1.0",
+    "Werkzeug>=3.0.0"
+]
 
 [project.urls]
 Homepage = "https://dev.azure.com/taheralsaegh/DevOps-HF"
 Repository = "https://dev.azure.com/taheralsaegh/DevOps-HF/_git/my-python-package"
 
 [tool.setuptools]
+# Alle Python-Module oder Packages, die im Wheel landen sollen:
 py-modules = ["application", "wsgi"]
+include-package-data = true
