@@ -210,6 +210,7 @@ jobs:
 
           runcmd:
             - mkdir -p /opt/flaskapp
+            - chown -R ubuntu:ubuntu /opt
             - cd /opt/flaskapp
             - python3 -m venv /opt/flaskapp/venv
             - /opt/flaskapp/venv/bin/pip install --upgrade pip
