@@ -210,7 +210,6 @@ jobs:
 
           runcmd:
             - mkdir -p /opt/flaskapp
-            - chown -R ubuntu:ubuntu /opt
             - cd /opt/flaskapp
             - python3 -m venv /opt/flaskapp/venv
             - /opt/flaskapp/venv/bin/pip install --upgrade pip
@@ -306,6 +305,7 @@ jobs:
           port: 22
           script: |
             set -euo pipefail
+            sudo chown -R ubuntu:ubuntu /opt
             source /opt/flaskapp/venv/bin/activate
             pip install --no-cache-dir --force-reinstall "/tmp/dist/${{ steps.wheel.outputs.wheel_name }}"
             sudo systemctl restart ecommerce.service
