@@ -61,6 +61,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
+          pip install .
 
       - name: Run Unit Tests
         run: pytest tests/ -v --tb=short
