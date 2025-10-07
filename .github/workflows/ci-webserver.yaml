@@ -187,7 +187,7 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
-      - name: Generate cloud-config (Bootstrap Server)
+      - name: Generate cloud-config
         run: |
           cat > cloud-config.yaml <<'EOF'
           #cloud-config
@@ -265,7 +265,7 @@ jobs:
             - systemctl start ecommerce.service
           EOF
 
-      - name: Launch EC2 instance (bootstrap + deploy base)
+      - name: Launch EC2 instance 
         run: |
           aws ec2 run-instances \
             --image-id ami-0360c520857e3138f \
@@ -279,7 +279,7 @@ jobs:
       - name: Wait for instance
         run: sleep 180s
 
-      - name: Fetch Instance ID and IP
+      - name: Fetch Instance ID and IP and Private IP
         run: |
           INSTANCE_ID=$(aws ec2 describe-instances \
             --filters "Name=tag:Name,Values=ecommerce-app" "Name=instance-state-name,Values=running" \
@@ -337,7 +337,7 @@ jobs:
           aws elbv2 wait target-in-service \
             --target-group-arn arn:aws:elasticloadbalancing:us-east-1:992382663608:targetgroup/myTarget-NLB/ccb61b58b60f4601 \
             --targets Id=${{ env.PRV_IP }}
-          echo "✅ Instance is healthy in Target Group"
+          echo "Instance is healthy in Target Group"
 
       - name: Deregister old instance from Target Group
         run: |
