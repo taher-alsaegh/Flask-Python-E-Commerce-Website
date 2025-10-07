@@ -272,6 +272,7 @@ jobs:
             --instance-type t3.micro \
             --security-group-ids sg-0bb418deecfe5ba5f \
             --subnet-id subnet-036e3bffe11c6d11c \
+            --private-ip-address 10.11.5.202 \
             --user-data file://cloud-config.yaml \
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=ecommerce-app}]'
 
@@ -287,6 +288,10 @@ jobs:
           IP=$(aws ec2 describe-instances \
             --instance-ids $INSTANCE_ID \
             --query "Reservations[0].Instances[0].PublicIpAddress" \
+            --output text)
+          PRV_IP=$(aws ec2 describe-instances \
+            --instance-ids $INSTANCE_ID \
+            --query "Reservations[0].Instances[0].PrivateIpAddress" \
             --output text)
           echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
           echo "IP=$IP" >> $GITHUB_ENV
@@ -323,21 +328,21 @@ jobs:
         run: |
           aws elbv2 register-targets \
             --target-group-arn arn:aws:elasticloadbalancing:us-east-1:992382663608:targetgroup/myTarget-NLB/ccb61b58b60f4601 \
-            --targets Id=${{ env.IP }}
+            --targets Id=${{ env.PRV_IP }}
 
       - name: Wait for instance to become healthy
         run: |
           echo "Waiting for target health..."
           aws elbv2 wait target-in-service \
             --target-group-arn arn:aws:elasticloadbalancing:us-east-1:992382663608:targetgroup/myTarget-NLB/ccb61b58b60f4601 \
-            --targets Id=${{ env.IP }}
+            --targets Id=${{ env.PRV_IP }}
           echo "✅ Instance is healthy in Target Group"
 
       - name: Deregister old instance from Target Group
         run: |
           OLD_IP=$(aws elbv2 describe-target-health \
             --target-group-arn arn:aws:elasticloadbalancing:us-east-1:992382663608:targetgroup/myTarget-NLB/ccb61b58b60f4601 \
-            --query "TargetHealthDescriptions[?Target.Id != '${{ env.IP }}'].Target.Id" \
+            --query "TargetHealthDescriptions[?Target.Id != '${{ env.PRV_IP }}'].Target.Id" \
             --output text)
           if [ -n "$OLD_IP" ]; then
             echo "Deregistering old instance: $OLD_IP"
