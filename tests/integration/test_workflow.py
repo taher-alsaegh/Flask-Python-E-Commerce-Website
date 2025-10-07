@@ -11,7 +11,7 @@ def mock_db(mocker):
             return []  # No existing user
         return []  # Default empty response
     mock.execute.side_effect = mock_execute
-    mocker.patch('application.get_db', return_value=mock)
+    mocker.patch('e_commerce.application.get_db', return_value=mock)
     return mock
 
 @pytest.fixture

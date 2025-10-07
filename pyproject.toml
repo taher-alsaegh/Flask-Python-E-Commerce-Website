@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "e-commerce"
-version = "0.3.11"
+version = "0.3.12"
 description = "Ecommerce Flask Web Application"
 authors = [{ name = "Taher Al Saegh", email = "taher.alsaegh@edu.tbz.ch" }]
 requires-python = ">=3.9"

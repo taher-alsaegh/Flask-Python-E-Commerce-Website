@@ -19,7 +19,7 @@ def mock_db(mocker):
             "description": "A test shirt"
         }
     ]
-    mocker.patch('application.get_db', return_value=mock)
+    mocker.patch('e_commerce.application.get_db', return_value=mock)
     return mock
 
 
