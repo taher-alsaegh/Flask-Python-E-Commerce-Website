@@ -321,38 +321,33 @@ jobs:
       # Loadbalncer Blue/Green-Deployment
       - name: Register new instance in Target Group
         run: |
-          INSTANCE_ID=$(aws ec2 describe-instances \
-            --filters "Name=tag:Name,Values=my-flaskapp" "Name=instance-state-name,Values=running" \
-            --query "Reservations[0].Instances[0].InstanceId" \
-            --output text)
-          echo "New instance ID: $INSTANCE_ID"
           aws elbv2 register-targets \
             --target-group-arn arn:aws:elasticloadbalancing:us-east-1:992382663608:targetgroup/myTarget-NLB/ccb61b58b60f4601 \
-            --targets Id=$INSTANCE_ID
+            --targets Id=${{ env.INSTANCE_ID }}
 
       - name: Wait for instance to become healthy
         run: |
           echo "Waiting for target health..."
           aws elbv2 wait target-in-service \
             --target-group-arn arn:aws:elasticloadbalancing:us-east-1:992382663608:targetgroup/myTarget-NLB/ccb61b58b60f4601 \
-            --targets Id=$INSTANCE_ID
+            --targets Id=${{ env.INSTANCE_ID }}
           echo "✅ Instance is healthy in Target Group"
 
       - name: Deregister old instance from Target Group
         run: |
-          OLD_INSTANCE=$(aws elbv2 describe-target-health \
+          OLD_IP=$(aws elbv2 describe-target-health \
             --target-group-arn arn:aws:elasticloadbalancing:us-east-1:992382663608:targetgroup/myTarget-NLB/ccb61b58b60f4601 \
-            --query "TargetHealthDescriptions[?Target.Id != '${INSTANCE_ID}'].Target.Id" \
+            --query "TargetHealthDescriptions[?Target.Id != '${{ env.INSTANCE_ID }}'].Target.Id" \
             --output text)
-          if [ -n "$OLD_INSTANCE" ]; then
-            echo "Deregistering old instance: $OLD_INSTANCE"
+          if [ -n "$OLD_IP" ]; then
+            echo "Deregistering old instance: $OLD_IP"
             aws elbv2 deregister-targets \
               --target-group-arn arn:aws:elasticloadbalancing:us-east-1:992382663608:targetgroup/myTarget-NLB/ccb61b58b60f4601\
-              --targets Id=$OLD_INSTANCE
+              --targets Id=$OLD_IP
             echo "Waiting for old instance to drain..."
             aws elbv2 wait target-deregistered \
               --target-group-arn arn:aws:elasticloadbalancing:us-east-1:992382663608:targetgroup/myTarget-NLB/ccb61b58b60f4601 \
-              --targets Id=$OLD_INSTANCE
+              --targets Id=$OLD_IP
           else
             echo "No old instance found — skipping."
           fi
