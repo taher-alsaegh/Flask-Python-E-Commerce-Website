@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "e-commerce"
-version = "0.3.12"
+version = "0.3.13"
 description = "Ecommerce Flask Web Application"
 authors = [{ name = "Taher Al Saegh", email = "taher.alsaegh@edu.tbz.ch" }]
 requires-python = ">=3.9"
@@ -30,3 +30,6 @@ Repository = "https://dev.azure.com/taheralsaegh/DevOps-HF/_git/my-python-packag
 py-modules = ["application", "wsgi"]
 include-package-data = true
 packages = ["e_commerce"]
+
+[tool.setuptools.package-data]
+e_commerce = ["templates/**/*.html", "static/**/*"]
