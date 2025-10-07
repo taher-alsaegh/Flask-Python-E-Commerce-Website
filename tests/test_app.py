@@ -1,6 +1,6 @@
 import pytest
 # pytest-mock is automatically imported
-from application import app
+from e_commerce.application import app
 
 
 @pytest.fixture

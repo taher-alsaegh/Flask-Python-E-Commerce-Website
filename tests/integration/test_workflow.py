@@ -1,6 +1,6 @@
 import pytest
 
-from application import app
+from e_commerce.application import app
 
 @pytest.fixture
 def mock_db(mocker):
