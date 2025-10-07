@@ -317,3 +317,42 @@ jobs:
             pip install --no-cache-dir --force-reinstall "/tmp/dist/${{ steps.wheel.outputs.wheel_name }}"
             sudo systemctl restart ecommerce.service
             sudo systemctl status --no-pager --full ecommerce.service || true
+        
+      # Loadbalncer Blue/Green-Deployment
+      - name: Register new instance in Target Group
+        run: |
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=my-flaskapp" "Name=instance-state-name,Values=running" \
+            --query "Reservations[0].Instances[0].InstanceId" \
+            --output text)
+          echo "New instance ID: $INSTANCE_ID"
+          aws elbv2 register-targets \
+            --target-group-arn ${{ secrets.AWS_TARGET_GROUP_ARN }} \
+            --targets Id=$INSTANCE_ID
+
+      - name: Wait for instance to become healthy
+        run: |
+          echo "Waiting for target health..."
+          aws elbv2 wait target-in-service \
+            --target-group-arn ${{ secrets.AWS_TARGET_GROUP_ARN }} \
+            --targets Id=$INSTANCE_ID
+          echo "✅ Instance is healthy in Target Group"
+
+      - name: Deregister old instance from Target Group
+        run: |
+          OLD_INSTANCE=$(aws elbv2 describe-target-health \
+            --target-group-arn ${{ secrets.AWS_TARGET_GROUP_ARN }} \
+            --query "TargetHealthDescriptions[?Target.Id != '${INSTANCE_ID}'].Target.Id" \
+            --output text)
+          if [ -n "$OLD_INSTANCE" ]; then
+            echo "Deregistering old instance: $OLD_INSTANCE"
+            aws elbv2 deregister-targets \
+              --target-group-arn ${{ secrets.AWS_TARGET_GROUP_ARN }} \
+              --targets Id=$OLD_INSTANCE
+            echo "Waiting for old instance to drain..."
+            aws elbv2 wait target-deregistered \
+              --target-group-arn ${{ secrets.AWS_TARGET_GROUP_ARN }} \
+              --targets Id=$OLD_INSTANCE
+          else
+            echo "No old instance found — skipping."
+          fi
