@@ -200,6 +200,8 @@ jobs:
             - python3-venv
             - sqlite3
             - mariadb-client-core
+            - libmariadb-dev-compat
+            - libmariadb-dev
             - pkg-config
             - libmariadb-dev
             - libmariadb-dev-compat
@@ -228,8 +230,12 @@ jobs:
               User=ubuntu
               WorkingDirectory=/opt/flaskapp
               Environment="PATH=/opt/flaskapp/venv/bin"
-              ExecStart=/opt/flaskapp/venv/bin/gunicorn --bind 127.0.0.1:8000 e_commerce:app --access-logfile /var/log/gunicorn/ecommerce.access.log --error-logfile /var/log/gunicorn/ecommerce.error.log
+              Environment="FLASK_APP=e_commerce.application"
+              ExecStart=/opt/flaskapp/venv/bin/gunicorn --bind 0.0.0.0:8000 e_commerce.application:app \
+                --access-logfile /var/log/gunicorn/ecommerce.access.log \
+                --error-logfile /var/log/gunicorn/ecommerce.error.log
               Restart=always
+              RestartSec=5
 
               [Install]
               WantedBy=multi-user.target
