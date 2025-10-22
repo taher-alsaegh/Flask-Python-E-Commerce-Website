@@ -324,7 +324,7 @@ jobs:
             sudo systemctl restart ecommerce.service
             sudo systemctl status --no-pager --full ecommerce.service || true
         
-      # Loadbalncer Blue/Green-Deployment
+      # Loadbalncer Blue/Green-Deployment 
       - name: Register new instance in Target Group
         run: |
           aws elbv2 register-targets \
