@@ -274,7 +274,7 @@ jobs:
             --subnet-id subnet-036e3bffe11c6d11c \
             --private-ip-address 10.11.5.203 \
             --user-data file://cloud-config.yaml \
-            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=ecommerce-app}]'
+            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=webserver}]'
 
       - name: Wait for instance
         run: sleep 180s
@@ -282,7 +282,7 @@ jobs:
       - name: Fetch Instance ID and IP and Private IP
         run: |
           INSTANCE_ID=$(aws ec2 describe-instances \
-            --filters "Name=tag:Name,Values=ecommerce-app" "Name=instance-state-name,Values=running" \
+            --filters "Name=tag:Name,Values=webserver" "Name=instance-state-name,Values=running" \
             --query "Reservations[0].Instances[0].InstanceId" \
             --output text)
           IP=$(aws ec2 describe-instances \
