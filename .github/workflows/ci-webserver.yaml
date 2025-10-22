@@ -272,7 +272,7 @@ jobs:
             --instance-type t3.micro \
             --security-group-ids sg-0bb418deecfe5ba5f \
             --subnet-id subnet-036e3bffe11c6d11c \
-            --private-ip-address 10.11.5.201 \
+            --private-ip-address 10.11.5.203 \
             --user-data file://cloud-config.yaml \
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=ecommerce-app}]'
 
